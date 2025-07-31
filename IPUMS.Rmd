@@ -17,36 +17,44 @@ library("sf")
 library("DT")
 library("htmltools")
 library("shiny")
+library("rstudioapi")
 
 #fonts
 library("showtext")
-showtext_auto()
 
 #model packages
 ```
+
 ```{r visual setup, include=T, echo = T}
 #font
 font = font_add_google("Pathway Gothic One", "Pathway Gothic One")
 font1 = "Pathway Gothic One"
+showtext_auto()
 
 #palette . I will add after I figure out the aesthetic I like
 
 #ggplot. I will add after I figure out the aesthetic I like
 ```
 
-## Import Data and Codebook
+### Import Data and Codebook <br>
 
 ```{r setup, include=T, echo = T}
 ddi = read_ipums_ddi("usa_00012.xml")
 data = read_ipums_micro(ddi)
 ```
+#### Data citation: Steven Ruggles, Sarah Flood, Matthew Sobek, Daniel Backman, Grace Cooper, Julia A. Rivera Drew, Stephanie Richards, Renae Rodgers, Jonathan Schroeder, and Kari C.W. Williams. IPUMS USA: Version 16.0 [dataset]. Minneapolis, MN: IPUMS, 2025. https://doi.org/10.18128/D010.V16.0 <br>
 
-## Data Exploration
+
+### On the data subset: _[forthcoming]_ <br>
+
+### Analysis objective: _[forthcoming]_ <br>
+
+### Data Exploration
 ```{r explore, echo=T}
 names(ddi)
-ipums_view(ddi)
+ipums_view(ddi,"codebook.html", launch = FALSE)
 ```
-## Data wrangle (I will add more as time progresses)
+### Data wrangle (I will add more as time progresses)
 ```{r subset, echo=T}
 college_regex = "^[123] yeear(s)? of college$" #define patern to relabel some college
 data$EDUCD_level = data$EDUCD %>%
@@ -61,7 +69,7 @@ data$EDUCD_level = data$EDUCD %>%
 ```
 
 
-## Data Exploration pt.2
+##Data Exploration pt.2
 ```{r wrangle, echo=T}
 college_to_advance_degree_graph = data %>%
   group_by(YEAR)%>%
@@ -73,8 +81,8 @@ more_than_four_college_year_to_population_age_25_to_67 = college_to_advance_degr
   mutate(percent = signif(prop*100, digits = 4))
 ```
 
-### Education Attainment v. various factors
-#### Composition of people with more than 4 years of college to population from 25-67 
+## Education Attainment v. various factors <br>
+### Composition of people with more than 4 years of college to population from 25-67 <br>
 ``` {r overview graph}
 ggplot(more_than_four_college_year_to_population_age_25_to_67, aes(YEAR, percent)) +
   geom_point(color = "#011638") +
@@ -87,7 +95,7 @@ ggplot(more_than_four_college_year_to_population_age_25_to_67, aes(YEAR, percent
     title = "Proportion of people with a college degree among the the 25 to 67 years old",
     subtitle = paste0("Data source: ", ddi$ipums_project),
     caption = paste(
-      strwrap(ipums_var_desc(ddi, EDUCD), 110),
+      strwrap(ipums_var_desc(ddi, EDUCD), ),
       collapse = "\n")) +
   geom_text(aes(label = paste(percent,"%"), family = font1,vjust = -0.5)) +
   theme(panel.grid.major = element_blank(), #graph element
@@ -95,11 +103,13 @@ ggplot(more_than_four_college_year_to_population_age_25_to_67, aes(YEAR, percent
         panel.background = element_rect(fill = '#FFF8F0'),
         plot.background = element_rect(fill = '#FFF8F0'), 
         axis.line = element_line(colour = "black")) +
-  theme(text=element_text(size=12,  family= font1)) #I split the function into two for readability
+  theme(text=element_text(size=20,  family= font1)) #I split the function into two for readability
 ```
-#_________________________________PLEASE DISREGARD ALL CODE BELLOW THIS LINE (FOR NOW)_________________________________
+#**_________________________________PLEASE DISREGARD ALL CODE BELLOW THIS LINE (FOR NOW)_________________________________** <br>
+
+
 #### Composition of people with more than 4 years of college to population from 25-67 
-``` {r overview graph}
+``` {r overview graph 2}
 ggplot(more_than_four_college_year_to_population_age_25_to_67, aes(YEAR, prop)) +
   geom_bar(stat = "identity") +
   ylim(0, 0.5) +
@@ -107,7 +117,7 @@ ggplot(more_than_four_college_year_to_population_age_25_to_67, aes(YEAR, prop)) 
     title = "proportion of people with a college degree among the the 25 to 67 years old",
     subtitle = paste0("Data source: ", ddi$ipums_project),
     caption = paste(
-      strwrap(ipums_var_desc(ddi, EDUCD), 90),
+      strwrap(ipums_var_desc(ddi, EDUCD), 300),
       collapse = "\n"
     ) +
   coord_flip() 
