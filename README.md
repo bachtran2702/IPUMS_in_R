@@ -1,0 +1,1 @@
+I recently finished reading the Wall Street Journal Guide to Information Graphics by Dona M. Wong and I want to try it out. My vision for the designs of the graphic is something you might find in the newspapers like FT and etc.
