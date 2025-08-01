@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-```{r technical setup, include=T, echo = T}
+```{r technical setup, include=T, echo = T, warning = FALSE, message = FALSE}
 library("ipumsr")
 library("dplyr")
 library("ggplot2")
@@ -32,8 +32,22 @@ font1 = "Pathway Gothic One"
 showtext_auto()
 
 #palette . I will add after I figure out the aesthetic I like
+palette = c("#011638","#23CE6B", "#FF8811","#800000","#305CDE", "#798086")
 
 #ggplot. I will add after I figure out the aesthetic I like
+##ggplot scale_color
+scale_color =  scale_color_manual(values= palette)
+scale_fill = scale_fill_manual(values= palette)
+
+##ggplot theme
+theme = theme(panel.grid.major = element_blank(), #graph element
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = '#FFF8F0'),
+          plot.background = element_rect(fill = '#FFF8F0'), 
+          axis.line = element_line(colour = "black")) +
+        theme(text=element_text(size=20,  family= font1),
+             (legend.position="bottom")) #I split the function into two for readability
+
 ```
 
 ### Import Data and Codebook <br>
@@ -69,7 +83,7 @@ data$EDUCD_level = data$EDUCD %>%
 ```
 
 
-##Data Exploration pt.2
+##Data Exploration pt.2 <br>
 ```{r wrangle, echo=T}
 college_to_advance_degree_graph = data %>%
   group_by(YEAR)%>%
@@ -83,7 +97,7 @@ more_than_four_college_year_to_population_age_25_to_67 = college_to_advance_degr
 
 ## Education Attainment v. various factors <br>
 ### Composition of people with more than 4 years of college to population from 25-67 <br>
-``` {r overview graph}
+``` {r overview graph, echo = T}
 ggplot(more_than_four_college_year_to_population_age_25_to_67, aes(YEAR, percent)) +
   geom_point(color = "#011638") +
   geom_line(color = "#011638") +
@@ -95,35 +109,62 @@ ggplot(more_than_four_college_year_to_population_age_25_to_67, aes(YEAR, percent
     title = "Proportion of people with a college degree among the the 25 to 67 years old",
     subtitle = paste0("Data source: ", ddi$ipums_project),
     caption = paste(
-      strwrap(ipums_var_desc(ddi, EDUCD), ),
-      collapse = "\n")) +
+      strwrap(ipums_var_desc(ddi, EDUCD),120),
+      collapse ="\n")) +
   geom_text(aes(label = paste(percent,"%"), family = font1,vjust = -0.5)) +
-  theme(panel.grid.major = element_blank(), #graph element
-        panel.grid.minor = element_blank(),
-        panel.background = element_rect(fill = '#FFF8F0'),
-        plot.background = element_rect(fill = '#FFF8F0'), 
-        axis.line = element_line(colour = "black")) +
-  theme(text=element_text(size=20,  family= font1)) #I split the function into two for readability
+  theme
+```
+#### Composition of people with more than 4 years of college to population from 25-67 <br>
+#bachelor and above are costly (for both the seekers and the institution that trains them, but does it really worth it?) <br>
+``` {r overview graph 2, echo = T}
+base_degree_post_secondary_excl_aa = data %>% #qty of post degree excl. AA 
+  select(YEAR, AGE, EDUCD) %>%
+  filter(AGE >=25 & AGE <= 67) %>% #Assuming retirement age is 67 
+  filter(EDUCD %in% c(101, 114:116))
+
+#function to calculate the proportion of each degree excl. AA 
+percent_degree_post_secondary_excl_aa_each_year = function(year) {
+    base_degree_post_secondary_excl_aa %>%
+        filter(YEAR == year) %>%
+        group_by(YEAR,EDUCD) %>%
+        summarise(quantity = n())%>%
+        mutate(frequency = quantity/sum(quantity)) %>%
+        mutate(percentage = signif(frequency*100, digits = 4))%>%
+        as_factor()
+}
+
+#df each year
+high_edu_prop18 = percent_degree_post_secondary_excl_aa_each_year(2018)
+high_edu_prop19 = percent_degree_post_secondary_excl_aa_each_year(2019)
+high_edu_prop20 = percent_degree_post_secondary_excl_aa_each_year(2020)
+high_edu_prop21 = percent_degree_post_secondary_excl_aa_each_year(2021)
+high_edu_prop22 = percent_degree_post_secondary_excl_aa_each_year(2022)
+high_edu_prop23 = percent_degree_post_secondary_excl_aa_each_year(2023)
+
+#over the year composition
+high_edu_prop_all = rbind(high_edu_prop18,high_edu_prop19,high_edu_prop20,high_edu_prop21,high_edu_prop22,high_edu_prop23) %>%
+  as_factor()
 ```
 #**_________________________________PLEASE DISREGARD ALL CODE BELLOW THIS LINE (FOR NOW)_________________________________** <br>
 
 
-#### Composition of people with more than 4 years of college to population from 25-67 
-``` {r overview graph 2}
-ggplot(more_than_four_college_year_to_population_age_25_to_67, aes(YEAR, prop)) +
-  geom_bar(stat = "identity") +
-  ylim(0, 0.5) +
+``` {r overview graph , echo = T}
+#plot
+ggplot(high_edu_prop_all, aes(YEAR, percentage, color= EDUCD)) +
+  geom_line() + 
+  geom_point() +
+  scale_color +
+  scale_fill +
   labs(
-    title = "proportion of people with a college degree among the the 25 to 67 years old",
-    subtitle = paste0("Data source: ", ddi$ipums_project),
+    x ="Year",
+    y = "% Degree-holders",
+    color = "Education Level",
+    title = "Highest degree completed among post-secondary degree holders",
+    subtitle = paste0("Respondents age 22-67 excluding AA degree-holders. Data source: ", ddi$ipums_project),
     caption = paste(
-      strwrap(ipums_var_desc(ddi, EDUCD), 300),
-      collapse = "\n"
-    ) +
-  coord_flip() 
-  )
-
-ggplot(college_to_advance_degree_graph, aes(YEAR, sum(EDUCD_level == "College or more"))) +
-  geom_line() 
-
+      strwrap(ipums_var_desc(ddi, EDUCD),120),
+      collapse ="\n")) +
+  geom_text(aes(label = paste(percentage,"%"), family = font1,vjust = -0.5)) +
+  theme(legend.position = "bottom")  +
+  theme 
 ```
