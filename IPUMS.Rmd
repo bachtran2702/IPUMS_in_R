@@ -188,8 +188,17 @@ college_to_non_college_str_sum = college_to_non_college %>%
   summarise(count = n())%>%
   print()
 
-ggplot(college_to_non_college_str_sum, aes(YEAR, count, group = EDUCD_classifier)) +
-  geom_bar()
+#data viz of total sample 2018-2023
+ggplot(college_to_non_college_str_sum, aes(x = YEAR, y = count, fill = EDUCD_classifier)) +
+  geom_bar(stat="identity") + 
+  geom_text(aes(label = count, vjust = -1, fill = "white")) +
+  scale_x_continuous(breaks = 2017:2023) +
+  labs(
+    x ="Year",
+    y = "Total people in the sample",
+    title = "Quantity of people between the age of 25 to 67 years old in the in sample",
+  theme +
+  scale_fill
 
 ```
 
