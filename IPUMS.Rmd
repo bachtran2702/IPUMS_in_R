@@ -145,7 +145,6 @@ high_edu_prop23 = percent_degree_post_secondary_excl_aa_each_year(2023)
 high_edu_prop_all = rbind(high_edu_prop18,high_edu_prop19,high_edu_prop20,high_edu_prop21,high_edu_prop22,high_edu_prop23) %>%
   as_factor()
 ```
-#**_________________________________PLEASE DISREGARD ALL CODE BELLOW THIS LINE (FOR NOW)_________________________________** <br>
 
 
 ``` {r overview graph , echo = T}
@@ -168,3 +167,45 @@ ggplot(high_edu_prop_all, aes(YEAR, percentage, color= EDUCD)) +
   theme(legend.position = "bottom")  +
   theme 
 ```
+
+
+``` {r college vs no college among working pop, echo = T}
+#plot
+college_to_non_college = data %>%
+  filter(AGE >=25 & AGE <= 67)
+
+college_to_non_college$EDUCD_classifier = college_to_non_college$EDUCD %>% #re-factor and re-label EDUCD where 1 = less the Bachelor, 2 = Bachelor & above
+  lbl_collapse(~ ifelse(.val %in% 0:100, 1, 
+                        ifelse(.val > 100 & .val < 999, 2, 999))) %>%
+  lbl_relabel(
+        lbl(1,"Less than a Bachelor Degree")~.val ==1,
+        lbl(2,"Bachelor Degree or more")~.val ==2
+        )%>%
+  as_factor()
+college_to_non_college_str_sum = college_to_non_college %>%
+  select(YEAR, EDUCD_classifier) %>%
+  group_by(YEAR, EDUCD_classifier)%>%
+  summarise(count = n())%>%
+  print()
+
+ggplot(college_to_non_college_str_sum, aes(YEAR, count, group = EDUCD_classifier)) +
+  geom_bar()
+
+```
+
+``` {r college vs income data graphs, echo = T}
+#plot
+college_to_non_college = data %>%
+  filter(AGE >=25 & AGE <= 67)
+
+college_to_non_college$EDUCD_classifier = college_to_non_college$EDUCD %>% #re-factor and re-label EDUCD where 1 = less the Bachelor, 2 = Bachelor & above
+  lbl_collapse(~ ifelse(.val %in% 0:100, 1, 
+                        ifelse(.val > 100 & .val < 999, 2, 999))) %>%
+  lbl_relabel(
+        lbl(1,"Less than a Bachelor Degree")~.val ==1,
+        lbl(2,"Bachelor Degree or more")~.val ==2
+        )%>%
+  as_factor()
+
+```
+#**_________________________________PLEASE DISREGARD ALL CODE BELLOW THIS LINE (FOR NOW)_________________________________** <br>
