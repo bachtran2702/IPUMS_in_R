@@ -54,7 +54,7 @@ theme = theme(panel.grid.major = element_blank(), #graph element
 
 ```{r setup, include=T, echo = T}
 ddi = read_ipums_ddi("usa_00012.xml")
-data = read_ipums_micro(ddi)
+dta_all = read_ipums_micro(ddi)
 ```
 #### Data citation: Steven Ruggles, Sarah Flood, Matthew Sobek, Daniel Backman, Grace Cooper, Julia A. Rivera Drew, Stephanie Richards, Renae Rodgers, Jonathan Schroeder, and Kari C.W. Williams. IPUMS USA: Version 16.0 [dataset]. Minneapolis, MN: IPUMS, 2025. https://doi.org/10.18128/D010.V16.0 <br>
 
@@ -71,7 +71,7 @@ ipums_view(ddi,"codebook.html", launch = FALSE)
 ### Data wrangle (I will add more as time progresses)
 ```{r subset, echo=T}
 college_regex = "^[123] yeear(s)? of college$" #define patern to relabel some college
-data$EDUCD_level = data$EDUCD %>%
+dta_all$EDUCD_level = dta_all$EDUCD %>%
   lbl_collapse(~.val %/% 10)%>%
   lbl_relabel(
     lbl(2,"Less than High School") ~.val> 0 & .val <6,
@@ -85,7 +85,7 @@ data$EDUCD_level = data$EDUCD %>%
 
 ##Data Exploration pt.2 <br>
 ```{r wrangle, echo=T}
-college_to_advance_degree_graph = data %>%
+college_to_advance_degree_graph = dta_all %>%
   group_by(YEAR)%>%
   filter(AGE >=25 & AGE <= 67) #Assuming retirement age is 67 
 
@@ -117,7 +117,7 @@ ggplot(more_than_four_college_year_to_population_age_25_to_67, aes(YEAR, percent
 #### Composition of people with more than 4 years of college to population from 25-67 <br>
 #bachelor and above are costly (for both the seekers and the institution that trains them, but does it really worth it?) <br>
 ``` {r overview graph 2, echo = T}
-base_degree_post_secondary_excl_aa = data %>% #qty of post degree excl. AA 
+base_degree_post_secondary_excl_aa = dta_all %>% #qty of post degree excl. AA 
   select(YEAR, AGE, EDUCD) %>%
   filter(AGE >=25 & AGE <= 67) %>% #Assuming retirement age is 67 
   filter(EDUCD %in% c(101, 114:116))
@@ -171,8 +171,9 @@ ggplot(high_edu_prop_all, aes(YEAR, percentage, color= EDUCD)) +
 
 ``` {r college vs no college among working pop, echo = T}
 #plot
-college_to_non_college = data %>%
+college_to_non_college = dta_all%>%
   filter(AGE >=25 & AGE <= 67)
+
 
 college_to_non_college$EDUCD_classifier = college_to_non_college$EDUCD %>% #re-factor and re-label EDUCD where 1 = less the Bachelor, 2 = Bachelor & above
   lbl_collapse(~ ifelse(.val %in% 0:100, 1, 
@@ -196,7 +197,7 @@ ggplot(college_to_non_college_str_sum, aes(x = YEAR, y = count, fill = EDUCD_cla
   labs(
     x ="Year",
     y = "Total people in the sample",
-    title = "Quantity of people between the age of 25 to 67 years old in the in sample",
+    title = "Quantity of people between the age of 25 to 67 years old in the in sample") +
   theme +
   scale_fill
 
@@ -204,7 +205,7 @@ ggplot(college_to_non_college_str_sum, aes(x = YEAR, y = count, fill = EDUCD_cla
 
 ``` {r college vs income data graphs, echo = T}
 #plot
-college_to_non_college = data %>%
+college_to_non_college = dta_all %>%
   filter(AGE >=25 & AGE <= 67)
 
 college_to_non_college$EDUCD_classifier = college_to_non_college$EDUCD %>% #re-factor and re-label EDUCD where 1 = less the Bachelor, 2 = Bachelor & above
