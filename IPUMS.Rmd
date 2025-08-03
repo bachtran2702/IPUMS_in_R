@@ -9,6 +9,7 @@ output: html_document
 library("ipumsr")
 library("dplyr")
 library("ggplot2")
+
 library(ggcorrplot)
 library("stringr")
 library("purrr")
@@ -28,6 +29,7 @@ library(corrplot)
 library(PerformanceAnalytics)
 
 #model packages
+library(tidymodels)
 ```
 
 ```{r visual setup, include=T, echo = T}
@@ -229,7 +231,7 @@ college_to_non_college$EDUCD_classifier = college_to_non_college$EDUCD %>% #re-f
 correlation_matrix_data = dta_all %>%
   filter(AGE >=25 & AGE <= 67) %>%
   select_if(is.numeric) %>%
-  select(-SAMPLE, -SERIAL, -CBSERIAL, -CLUSTER, -STRATA,) 
+  select(-SAMPLE, -SERIAL, -CBSERIAL, -CLUSTER, -STRATA,-GQ, -DEGFIELD2, -OWNERSHPD, -EDUC, - GRADEATT, -DEGFIELD2D, -CLASSWKRD) 
 
 
 #these are quite unreadable and only use for diagnostic purpose
@@ -242,5 +244,11 @@ print(chart.Correlation(raw_corr_matrix, histogram = T, method = "spearman")) #a
 model.matrix(~0+., data=correlation_matrix_data) %>% 
   cor(use="pairwise.complete.obs") %>% 
   ggcorrplot(show.diag=FALSE, type="lower", lab=TRUE, lab_size=2)
+
+```
+
+``` {r removing_correlated_predictor, echo = T}
+clean_data = correlation_matrix_data%>%
+  step_corr(all_numeric(), threshold = 0.8)
 
 ```
