@@ -247,8 +247,13 @@ model.matrix(~0+., data=correlation_matrix_data) %>%
 
 ```
 
-``` {r removing_correlated_predictor, echo = T}
+``` {r removing_correlated_predictor_and_random_sampling, echo = T}
 clean_data = correlation_matrix_data%>%
   step_corr(all_numeric(), threshold = 0.8)
 
+# Create the split
+study_split <- initial_split(clean_data, prop = 0.8)
+
+# Print the data split
+print(study_split)
 ```
