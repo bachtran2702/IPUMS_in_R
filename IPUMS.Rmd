@@ -9,6 +9,7 @@ output: html_document
 library("ipumsr")
 library("dplyr")
 library("ggplot2")
+library(ggcorrplot)
 library("stringr")
 library("purrr")
 library("sf")
@@ -21,6 +22,10 @@ library("rstudioapi")
 
 #fonts
 library("showtext")
+
+#stats packages
+library(corrplot)
+library(PerformanceAnalytics)
 
 #model packages
 ```
@@ -189,10 +194,10 @@ college_to_non_college_str_sum = college_to_non_college %>%
   summarise(count = n())%>%
   print()
 
-#data viz of total sample 2018-2023
+#data viz of total sample 2018-2023. not for publictation
 ggplot(college_to_non_college_str_sum, aes(x = YEAR, y = count, fill = EDUCD_classifier)) +
   geom_bar(stat="identity") + 
-  geom_text(aes(label = count, vjust = -1, fill = "white")) +
+  geom_text(aes(label = count, vjust = 1), color = "white") +
   scale_x_continuous(breaks = 2017:2023) +
   labs(
     x ="Year",
@@ -219,3 +224,23 @@ college_to_non_college$EDUCD_classifier = college_to_non_college$EDUCD %>% #re-f
 
 ```
 #**_________________________________PLEASE DISREGARD ALL CODE BELLOW THIS LINE (FOR NOW)_________________________________** <br>
+
+``` {r correlation matrix, echo = T}
+correlation_matrix_data = dta_all %>%
+  filter(AGE >=25 & AGE <= 67) %>%
+  select_if(is.numeric) %>%
+  select(-SAMPLE, -SERIAL, -CBSERIAL, -CLUSTER, -STRATA,) 
+
+
+#these are quite unreadable and only use for diagnostic purpose
+raw_corr_matrix = correlation_matrix_data%>%
+  cor()
+
+corrplot(raw_corr_matrix)
+print(chart.Correlation(raw_corr_matrix, histogram = T, method = "spearman")) #assuming on-parametric and does non-linear relationship
+
+model.matrix(~0+., data=correlation_matrix_data) %>% 
+  cor(use="pairwise.complete.obs") %>% 
+  ggcorrplot(show.diag=FALSE, type="lower", lab=TRUE, lab_size=2)
+
+```
