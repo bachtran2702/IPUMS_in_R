@@ -3,3 +3,5 @@ I recently finished reading the Wall Street Journal Guide to Information Graphic
 Data source: Steven Ruggles, Sarah Flood, Matthew Sobek, Daniel Backman, Grace Cooper, Julia A. Rivera Drew, Stephanie Richards, Renae Rodgers, Jonathan Schroeder, and Kari C.W. Williams. IPUMS USA: Version 16.0 [dataset]. Minneapolis, MN: IPUMS, 2025. https://doi.org/10.18128/D010.V16.0
 
 Exact extract is available upon request (size: 570MB, no need to unzip)
+
+Update 1: Due to the size of the Markdown and my relatively modest RAM, I will have to divide the project into multiple Markdown file
