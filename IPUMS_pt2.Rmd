@@ -1,0 +1,91 @@
+---
+title: "IPUMS & R pt.2"
+author: "Bach Tran"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r technical setup, include=T, echo = T, warning = FALSE, message = FALSE}
+library("ipumsr")
+library("dplyr")
+library("ggplot2")
+
+library(ggcorrplot)
+library("stringr")
+library("purrr")
+library("sf")
+
+#html
+library("DT")
+library("htmltools")
+library("shiny")
+library("rstudioapi")
+
+#fonts
+library("showtext")
+
+#stats packages
+library(corrplot)
+library(PerformanceAnalytics)
+
+#model packages
+library(tidymodels)
+```
+
+```{r visual setup, include=T, echo = T}
+#font
+font = font_add_google("Pathway Gothic One", "Pathway Gothic One")
+font1 = "Pathway Gothic One"
+showtext_auto()
+
+#palette . I will add after I figure out the aesthetic I like
+palette = c("#011638","#23CE6B", "#FF8811","#800000","#305CDE", "#798086")
+
+#ggplot. I will add after I figure out the aesthetic I like
+##ggplot scale_color
+scale_color =  scale_color_manual(values= palette)
+scale_fill = scale_fill_manual(values= palette)
+
+##ggplot theme
+theme = theme(panel.grid.major = element_blank(), #graph element
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = '#FFF8F0'),
+          plot.background = element_rect(fill = '#FFF8F0'), 
+          axis.line = element_line(colour = "black")) +
+        theme(text=element_text(size=20,  family= font1),
+             (legend.position="bottom")) #I split the function into two for readability
+
+```
+
+### Import Data and Codebook <br>
+
+```{r setup, include=T, echo = T}
+ddi = read_ipums_ddi("usa_00012.xml")
+dta_all = read_ipums_micro(ddi)
+```
+``` {r correlation matrix, echo = T}
+correlation_matrix_data = dta_all %>%
+  filter(AGE >=25 & AGE <= 67) %>%
+  select_if(is.numeric) %>%
+  select(-SAMPLE, -SERIAL, -CBSERIAL, -CLUSTER, -STRATA,-GQ, -DEGFIELD2, -OWNERSHPD, -EDUC, - GRADEATT, -DEGFIELD2D, -CLASSWKRD) 
+
+
+#these are quite unreadable and only use for diagnostic purpose
+raw_corr_matrix = correlation_matrix_data%>%
+  cor()
+
+corrplot(raw_corr_matrix)
+print(chart.Correlation(raw_corr_matrix, histogram = T, method = "spearman")) #assuming on-parametric and does non-linear relationship
+
+model.matrix(~0+., data=correlation_matrix_data) %>% 
+  cor(use="pairwise.complete.obs") %>% 
+  ggcorrplot(show.diag=FALSE, type="lower", lab=TRUE, lab_size=2)
+clean_data = correlation_matrix_data%>%
+  step_corr(all_numeric(), threshold = 0.8)
+
+# Create the split
+study_split <- initial_split(clean_data, prop = 0.8)
+
+# Print the data split
+print(study_split)
+```
