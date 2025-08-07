@@ -6,7 +6,7 @@ Exact extract is available upon request (size: 570MB, no need to unzip)
 
 Update 1 (August 1st): Due to the size of the Markdown and my relatively modest RAM, I will have to divide the project into multiple Markdown file
 
-Update 2  (August 6th): I will put this project on pause until I could upgrade my RAM to comfortably accomdate it
+Update 2  (August 6th): I will put this project on pause until I could upgrade my RAM to comfortably accomdate it. I will probably continue with the literature review and subset the data furthe so it will less burdensome to my computer.
 
 <img width="903" height="211" alt="image" src="https://github.com/user-attachments/assets/bac5847c-ae7d-4f38-8dd7-4c6c853f93e9" />
 
