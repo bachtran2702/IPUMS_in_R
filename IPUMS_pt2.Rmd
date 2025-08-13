@@ -10,7 +10,7 @@ library("ipumsr")
 library("dplyr")
 library("ggplot2")
 
-library(ggcorrplot)
+library("ggcorrplot")
 library("stringr")
 library("purrr")
 library("sf")
@@ -34,7 +34,7 @@ library(tidymodels)
 
 ```{r visual setup, include=T, echo = T}
 #font
-font = font_add_google("Pathway Gothic One", "Pathway Gothic One")
+font = font_add_google("Roboto", "Roboto")
 font1 = "Pathway Gothic One"
 showtext_auto()
 
@@ -74,16 +74,17 @@ correlation_matrix_data = dta_all %>%
 raw_corr_matrix = correlation_matrix_data%>%
   cor()
 
-corrplot(raw_corr_matrix)
-print(chart.Correlation(raw_corr_matrix, histogram = T, method = "spearman")) #assuming on-parametric and does non-linear relationship
+chart.Correlation(raw_corr_matrix, histogram = T, method = "spearman")#assuming on-parametric and does non-linear relationship
 
 model.matrix(~0+., data=correlation_matrix_data) %>% 
   cor(use="pairwise.complete.obs") %>% 
   ggcorrplot(show.diag=FALSE, type="lower", lab=TRUE, lab_size=2)
-clean_data = correlation_matrix_data%>%
+
+clean_data = correlation_matrix_data %>%
   step_corr(all_numeric(), threshold = 0.8)
 
-# Create the split
+    
+# Create data split 80-20 for validation
 study_split <- initial_split(clean_data, prop = 0.8)
 
 # Print the data split
